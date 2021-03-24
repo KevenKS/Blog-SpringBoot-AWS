@@ -1,8 +1,5 @@
 package controller;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,43 +12,51 @@ import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import model.Post;
-import service.CodeblogService;
+import service.BlogService;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Controller
-public class CodeblogController {
+public class BlogController {
 
-	@Autowired
-	CodeblogService	codeblogservice;
-	
-	@RequestMapping(value = "/posts", method = RequestMethod.GET)
-	public ModelAndView getPosts() {
-		ModelAndView mv = new ModelAndView("posts");
-		List<Post> posts = codeblogservice.findAll();
-		mv.addObject("posts", posts);
-		return mv;
-	}
-	
-	@RequestMapping(value="/posts/{id}", method=RequestMethod.GET)
+    @Autowired
+    BlogService blogService;
+
+    @RequestMapping("/")
+    public String index(){
+        return "index";
+    }
+
+    @RequestMapping(value="/posts", method=RequestMethod.GET)
+    public ModelAndView getPosts(){
+        ModelAndView mv = new ModelAndView("posts");
+        List<Post> posts = blogService.findAll();
+        mv.addObject("posts", posts);
+        return mv;
+    }
+
+    @RequestMapping(value="/posts/{id}", method=RequestMethod.GET)
     public ModelAndView getPostDetails(@PathVariable("id") long id){
         ModelAndView mv = new ModelAndView("postDetails");
-        Post post = codeblogservice.findById(id);
+        Post post = blogService.findById(id);
         mv.addObject("post", post);
         return mv;
     }
-	
-	@RequestMapping(value="/newpost", method=RequestMethod.GET)
+
+    @RequestMapping(value="/newpost", method=RequestMethod.GET)
     public String getPostForm(){
         return "postForm";
     }
-	
-	@RequestMapping(value="/newpost", method=RequestMethod.POST)
+
+    @RequestMapping(value="/newpost", method=RequestMethod.POST)
     public String savePost(@Valid Post post, BindingResult result, RedirectAttributes attributes){
         if(result.hasErrors()){
             attributes.addFlashAttribute("mensagem", "Verifique se os campos obrigatórios foram preenchidos!");
             return "redirect:/newpost";
         }
         post.setData(LocalDate.now());
-        codeblogservice.save(post);
+        blogService.save(post);
         return "redirect:/posts";
     }
 }
